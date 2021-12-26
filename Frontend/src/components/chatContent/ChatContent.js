@@ -26,17 +26,22 @@ const ChatContent = () => {
     setIsReady(false);
   };
 
-  const sendMsg = async (message) => {
-    let userMessage = { type: "", msg: message };
-    setMessages([...messages, userMessage]);
-    setMsg("");
+  const addMessageChat = (message, user) => {
+    let allChats = messages;
+    allChats.push({ type: user, msg: message });
+    setMessages(allChats);
+  };
+
+  const sendMsg = async () => {
+    addMessageChat(msg, "me");
+    console.log(messages);
     const config = {
       headers: {
         "Content-Type": "application/json",
       },
     };
 
-    const body = JSON.stringify({ message });
+    const body = JSON.stringify({ message: msg });
 
     try {
       const res = await axios.post(
@@ -44,8 +49,8 @@ const ChatContent = () => {
         body,
         config
       );
-      let computerMessage = { type: "other", msg: res.data.answer };
-      setMessages([...messages, computerMessage]);
+      addMessageChat(res.data.answer, "other");
+      setMsg("");
     } catch (error) {
       console.error(error);
     }
@@ -69,7 +74,7 @@ const ChatContent = () => {
         className="content__body"
         style={{ backgroundColor: Colors.primary }}
       >
-        {isReady == true ? (
+        {isReady === true ? (
           <Intro onPress={handleStart} />
         ) : (
           <div className="chat__items">
@@ -78,7 +83,7 @@ const ChatContent = () => {
                 <ChatItem
                   animationDelay={index + 2}
                   key={index}
-                  user={itm.type ? itm.type : "me"}
+                  user={itm.type === "other" ? "other" : "me"}
                   msg={itm.msg}
                   image={itm.type === "other" ? botImage : userImage}
                 />
